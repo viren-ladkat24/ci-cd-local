@@ -10,7 +10,7 @@ pipeline {
 
         stage('Clone') {
             steps {
-                git 'https://github.com/viren-ladkat24/ci-cd-local.git'
+                git branch: 'main', url: 'https://github.com/viren-ladkat24/ci-cd-local.git'
             }
         }
 
