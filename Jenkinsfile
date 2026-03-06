@@ -15,10 +15,10 @@ pipeline {
         }
 
         stage('Build Image') {
-            steps {
-                sh "docker build -t %IMAGE_NAME%:%TAG% ."
-            }
-        }
+    steps {
+        sh 'docker build -t $IMAGE_NAME:$TAG .'
+    }
+} 
 
         stage('Push Image') {
             steps {
