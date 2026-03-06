@@ -2,43 +2,38 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "virenladkat/nginx-app"
-        TAG = "${BUILD_NUMBER}"
+        IMAGE_NAME = "my-website"
+        CONTAINER_NAME = "my-website-container"
     }
 
     stages {
 
-        stage('Clone') {
+        stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/viren-ladkat24/ci-cd-local.git'
+                git 'https://github.com/viren-ladkat24/ci-cd-local.git'
             }
         }
 
-        stage('Build Image') {
-    steps {
-        sh 'docker build -t $IMAGE_NAME:$TAG .'
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME .'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh '''
+                docker rm -f $CONTAINER_NAME || true
+                docker run -d -p 80:80 --name $CONTAINER_NAME $IMAGE_NAME
+                '''
+            }
+        }
+
     }
-} 
 
-        stage('Push Image') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'docker-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh """
-                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                    docker push %IMAGE_NAME%:%TAG%
-                    """
-                }
-            }
-        }
-
-        stage('Deploy to Minikube') {
-            steps {
-                sh "kubectl set image deployment/nginx-app nginx-app=%IMAGE_NAME%:%TAG%"
-            }
+    post {
+        success {
+            echo "Website deployed successfully"
         }
     }
 }
