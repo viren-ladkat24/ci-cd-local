@@ -16,7 +16,7 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                bat "docker build -t %IMAGE_NAME%:%TAG% ."
+                sh "docker build -t %IMAGE_NAME%:%TAG% ."
             }
         }
 
@@ -27,7 +27,7 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    bat """
+                    sh """
                     echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                     docker push %IMAGE_NAME%:%TAG%
                     """
@@ -37,7 +37,7 @@ pipeline {
 
         stage('Deploy to Minikube') {
             steps {
-                bat "kubectl set image deployment/nginx-app nginx-app=%IMAGE_NAME%:%TAG%"
+                sh "kubectl set image deployment/nginx-app nginx-app=%IMAGE_NAME%:%TAG%"
             }
         }
     }
